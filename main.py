@@ -6,9 +6,9 @@ color_boundaries = {
                         'green':([86, 31, 4], [220, 88, 50]),
                         'blue':([25, 146, 190], [62, 174, 250]),
                         'grey':([103, 86, 65], [145, 133, 128]),
-                        'pink':([40,0,100],[255,255,255])
+                        'pink':([60,0,130],[255,100,255])
                     }
-N_FILTER = 40 # patchsize is 40x40   
+N_FILTER = 16 # patchsize is 40x40   
 
 def find_max_patch(gridboard,custom_filter):
     # independent patches
@@ -34,11 +34,7 @@ def find_max_patch(gridboard,custom_filter):
     return max_patch
 
 def get_ball_position(gridboard):
-    lower_grey,upper_grey = color_boundaries['green']
-    lower_grey = np.array(lower_grey)
-    upper_grey = np.array(upper_grey)
-    binary_grid = cv2.inRange(gridboard, lower_grey, upper_grey)
-    max_patch = find_max_patch(binary_grid,np.ones((N_FILTER,N_FILTER)))
+    max_patch = find_max_patch(gridboard,np.ones((N_FILTER,N_FILTER)))
     return max_patch
 
 
@@ -48,7 +44,12 @@ def render_screen(frame,ball_position):
     cv2.imshow('frame',frame)
 
 def preprocess_image(image):
-    cvtColor(image, frame_HSV, cv2.COLOR_BGR2HSV);
+    lower_grey,upper_grey = color_boundaries['pink']
+    lower_grey = np.array(lower_grey)
+    upper_grey = np.array(upper_grey)
+    binary_grid = cv2.inRange(image, lower_grey, upper_grey)
+    return binary_grid
+    #cvtColor(image, frame_HSV, cv2.COLOR_BGR2HSV);
 def game_loop(gridboard):    
     gridboard = preprocess_image(gridboard)   
     ball_position = get_ball_position(gridboard)
@@ -66,7 +67,7 @@ def main():
         game_loop(frame)   
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break    
-        break
+
 
     cap.release()
     cv2.destroyAllWindows()
