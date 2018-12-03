@@ -5,6 +5,12 @@ import argparse
 import numpy as np
 
 from game import Game
+
+N_TILES = 7
+BOARD_P1,BOARD_P2 = np.array((90,20)),np.array((530,460))
+TILE_SIZE = (BOARD_P2[0] - BOARD_P1[0])//N_TILES
+
+
 def callback(value):
     pass
 
@@ -94,24 +100,33 @@ def main():
             M = cv2.moments(c)
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
  
-            # only proceed if the radius meets a minimum size
-            if radius > 10:
-                # draw the circle and centroid on the frame,
-                # then update the list of tracked points
-                cv2.circle(image, (int(x), int(y)), int(radius),(0, 255, 255), 2)
-                cv2.circle(image, center, 3, (0, 0, 255), -1)
-                cv2.putText(image,"centroid", (center[0]+10,center[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(0, 0, 255),1)
-                cv2.putText(image,"("+str(center[0])+","+str(center[1])+")", (center[0]+10,center[1]+15), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(0, 0, 255),1)
-                cv2.putText(image,"Radius: "+ str(radius), (center[0]+30,center[1]+35), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(0, 0, 255),1)
+            absolute_location = None
+            discrete_location = None
+            for i in range(N_TILES):
+                for j in range(N_TILES):
+                    p1 = (BOARD_P1[0] + i*TILE_SIZE,BOARD_P1[1] + j*TILE_SIZE)
+                    p2 = (BOARD_P1[0] + (i+1)*TILE_SIZE,BOARD_P1[1] + (j+1)*TILE_SIZE)
 
-                game.update(image,center,radius)
-
-                print(image.shape)
-                cv2.rectangle(image,(90,20),(530,460),(0,255,0),3)
+                    if center[0] >= p1[0] and center[0] <= p2[0] \
+                        and center[1] >= p1[1] and center[1] <= p2[1]:
+                            absolute_location = tuple(p1),tuple(p2)
+                            discrete_location = (i+1,j+1)
+                    else:
+                        cv2.rectangle(image,tuple(p1),
+                                        tuple(p2),(255,0,0),3)
+            if absolute_location:
+                print(absolute_location)
+                x_text = absolute_location[0][0]//1 + 5 #TILE_SIZE 
+                y_text = absolute_location[0][1]//1 + TILE_SIZE//2 + 10
+                cv2.rectangle(image,absolute_location[0],absolute_location[1],(0,255,0),3)
+                cv2.putText(image,"%d,%d" %discrete_location, (x_text,y_text), cv2.FONT_HERSHEY_COMPLEX, 1,(0, 0, 255),2)
+        
+            game.update(image,center,radius)
+                
         # show the frame to our screen
         cv2.imshow("Original", image)
-        cv2.imshow("Thresh", thresh)
-        cv2.imshow("Mask", mask)
+        #cv2.imshow("Thresh", thresh)
+        #cv2.imshow("Mask", mask)
 
         if cv2.waitKey(1) & 0xFF is ord('q'):
             break
