@@ -12,11 +12,11 @@ RED_MAX = (100,100,255)
 BLACK_MIN = (0,0,0)
 BLACK_MAX = (50,50,50)
 
+
 COLORS = {'yellow':(YELLOW_MIN,YELLOW_MAX),
 		  'green':(GREEN_MIN,GREEN_MAX)}
 COLOR_NAMES = ['yellow','green']
 
-GRID_START,GRID_END = (90,20),(530,460)
 
 
 def score(frame_to_thresh,min_values,max_values):
@@ -66,6 +66,4 @@ class Game:
 
 	def message_arduino(self):
 		# send position and score
-		pass
-	def compute_ball_position():
 		pass
