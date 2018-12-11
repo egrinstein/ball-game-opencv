@@ -6,12 +6,14 @@ import numpy as np
 
 from tracker import Tracker
 from game import Game
-
+from time import sleep
 
 
 def get_arguments():
     ap = argparse.ArgumentParser()
     ap.add_argument('-c', '--calibrate', required=False,
+                    help='Calibration mode', action='store_true')
+    ap.add_argument('-n', '--nogame', required=False,
                     help='Calibration mode', action='store_true')
     args = vars(ap.parse_args())
 
@@ -23,27 +25,29 @@ def main():
 
     args = get_arguments()
     calibrate = args['calibrate']
-
+    no_game = args['nogame']
     tracker = Tracker(calibrate=calibrate) 
     
-    if False:
+    if not no_game:
         game = Game()
 
     while True:
         image, position = tracker.loop()
 
         if type(image) != "NoneType":
-            cv2.imshow("Original", image)
-        if position:
-            if False:
-                game.send_position_to_arduino(position)
-            
+            try:
+                cv2.imshow("Original", image)
+            except:
+                continue
+        if position and not no_game:
+            game.send_position_to_arduino(position)
 
         # Keyboard commands
         if cv2.waitKey(1) & 0xFF is ord('q'):
+            game.close()
             break
-        if cv2.waitKey(1) & 0xFF is ord('N'):
-            serial_arduino.write("N".encode())
+        if cv2.waitKey(1) & 0xFF is ord('n'):
+            game.new()
 
 if __name__ == '__main__':
     main()

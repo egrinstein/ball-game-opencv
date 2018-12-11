@@ -7,6 +7,10 @@ N_TILES = 7
 BOARD_P1,BOARD_P2 = np.array((90,20)),np.array((530,460))
 TILE_SIZE = (BOARD_P2[0] - BOARD_P1[0])//N_TILES
 
+def reflect7(position):
+    p0 = (4 - position[0])*2 + position[0] 
+    p1 = (4 - position[1])*2 + position[1]
+    return (p0,p1)
 
 def callback(value):
     pass
@@ -42,9 +46,11 @@ class Tracker():
 
     def loop(self):
         ret, image = self.camera.read()
+        if not ret:
+            return None,None
+
         if self.calibrate:
             values = get_trackbar_values()
-            print(values)
             self.black_min,self.black_max = values[0:3],values[3:6]
         frame_to_thresh = image.copy() # [90:530,20:460]
         
@@ -84,6 +90,7 @@ class Tracker():
             if grid_location:
                 x_text = pixel_location[0][0]//1 + 5 #TILE_SIZE 
                 y_text = pixel_location[0][1]//1 + TILE_SIZE//2 + 10
+                grid_location = reflect7(grid_location)
                 cv2.rectangle(image,pixel_location[0],pixel_location[1],(0,255,0),3)
                 cv2.putText(image,"%d,%d" %grid_location, (x_text,y_text), cv2.FONT_HERSHEY_COMPLEX, 1,(0, 0, 255),2)
                 
